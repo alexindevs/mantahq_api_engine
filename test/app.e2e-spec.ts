@@ -57,7 +57,7 @@ describe('MantaHQ Dynamic API Engine (e2e)', () => {
       const validConfig = {
         name: 'test-api',
         method: 'POST',
-        body: { email: '', username: '' },
+        body: { email: 'string', username: 'string' },
         customValidation: `function customValidation(data) {
           const email = data.body.email;
           if (!email) {
@@ -97,7 +97,7 @@ describe('MantaHQ Dynamic API Engine (e2e)', () => {
       const config = {
         name: 'duplicate-test',
         method: 'POST',
-        body: { email: '' },
+        body: { email: 'string' },
         customValidation: `function customValidation(data) {
           return { isValid: true, message: 'OK' };
         }`,
