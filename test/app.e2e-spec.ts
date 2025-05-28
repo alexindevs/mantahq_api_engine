@@ -122,7 +122,7 @@ describe('MantaHQ Dynamic API Engine (e2e)', () => {
       const config = {
         name: 'email-validator',
         method: 'POST',
-        body: { email: '', username: '' },
+        body: { email: 'string', username: 'string' },
         customValidation: `function customValidation(data) {
           const email = data.body.email;
           if (!email) {
@@ -191,7 +191,7 @@ describe('MantaHQ Dynamic API Engine (e2e)', () => {
       const maliciousConfig = {
         name: 'security-test',
         method: 'POST',
-        body: { input: '' },
+        body: { input: 'string' },
         customValidation: `function customValidation(data) {
           // Let this throw and be caught by SandboxService's outer catch
           process.exit(1); 
@@ -231,7 +231,7 @@ describe('MantaHQ Dynamic API Engine (e2e)', () => {
       const timeoutConfig = {
         name: 'timeout-test',
         method: 'POST',
-        body: { input: '' },
+        body: { input: 'string' },
         customValidation: `function customValidation(data) {
           while (true) {
             // Infinite loop to test timeout

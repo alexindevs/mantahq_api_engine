@@ -19,11 +19,11 @@ export class CreateConfigDto {
   method: string;
 
   @ApiProperty({
-    description: 'Expected request body structure',
-    example: { email: '', username: '' },
+    description: 'Expected request body structure and type',
+    example: { email: 'string', username: 'string' },
   })
   @IsObject()
-  body: Record<string, any>;
+  body: Record<string, string>;
 
   @ApiProperty({
     description: 'Custom validation function as a string',
