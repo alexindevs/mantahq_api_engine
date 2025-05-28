@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsObject, IsIn, Matches } from 'class-validator';
+import { NoEmptyKeysOrValues } from '../../../validators/no-empty-keys';
 
 export class CreateConfigDto {
   @ApiProperty({
@@ -19,10 +20,13 @@ export class CreateConfigDto {
   method: string;
 
   @ApiProperty({
-    description: 'Expected request body structure and type',
+    description: 'Expected request body keys and types',
     example: { email: 'string', username: 'string' },
+    type: 'object',
+    additionalProperties: { type: 'string' },
   })
   @IsObject()
+  @NoEmptyKeysOrValues()
   body: Record<string, string>;
 
   @ApiProperty({
