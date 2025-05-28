@@ -9,7 +9,7 @@ import {
 import { ApiService } from './api.service';
 import { Response } from '@nestjs/common';
 
-@ApiTags('Dynamic API')
+@ApiTags('API')
 @Controller('api')
 export class ApiController {
   private readonly logger = new Logger(ApiController.name);
