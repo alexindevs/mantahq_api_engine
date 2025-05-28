@@ -46,12 +46,16 @@ export class ApiService {
       );
     }
 
+    // Extract expected and actual keys from schemas
     const expectedKeys = Object.keys(expectedSchema);
     const requestKeys = Object.keys(requestPayload);
 
+    // Identify missing keys in the request payload
     const missingKeys = expectedKeys.filter(
       (key) => !requestKeys.includes(key),
     );
+
+    // If there are missing keys, throw an error
     if (missingKeys.length > 0) {
       throw new BadRequestException({
         error: 'Missing required keys',
@@ -60,12 +64,14 @@ export class ApiService {
       });
     }
 
+    // Identify keys with invalid types in the request payload
     const invalidTypes = expectedKeys.filter((key) => {
       const expectedType = expectedSchema[key];
       const actualType = typeof requestPayload[key];
       return actualType !== expectedType;
     });
 
+    // If there are invalid types, throw an error
     if (invalidTypes.length > 0) {
       throw new BadRequestException({
         error: 'Invalid types',

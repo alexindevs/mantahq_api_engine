@@ -26,25 +26,30 @@ export class SandboxService {
     validationCode: string,
     data: { body: Record<string, any> },
   ): Promise<SandboxExecutionResult> {
-    const start = Date.now();
+    const start = Date.now(); // Capture start time for execution time calculation
 
     try {
+      // Initialize an isolate with memory limits to sandbox the execution
       const isolate = new ivm.Isolate({ memoryLimit: this.memoryLimit });
       const context = await isolate.createContext();
 
+      // Jail the global scope to prevent access to Node internals
       const jail = context.global;
       await jail.set('global', jail.derefInto());
 
+      // Sanitize and freeze the input data to prevent modifications
       const sanitizedData = {
         body: JSON.parse(JSON.stringify(data.body || {})),
       };
       Object.freeze(sanitizedData);
 
+      // Set the frozen data in the sandboxed environment
       await jail.set(
         'data',
         new ivm.ExternalCopy(sanitizedData).copyInto({ release: true }),
       );
 
+      // Append validation code and ensure it's a function before executing
       const fullCode = `
         ${validationCode}
         if (typeof customValidation !== 'function') {
@@ -55,17 +60,19 @@ export class SandboxService {
         })();
       `;
 
+      // Compile and run the script within the isolated context
       const script = await isolate.compileScript(fullCode);
 
       const result = JSON.parse(
         await script.run(context, {
-          timeout: this.timeout,
+          timeout: this.timeout, // Execution timeout for the script
           result: { copy: true },
         }),
-      ) as { timeout: number; isValid: boolean; message: string };
+      ) as ValidationResult;
 
-      const executionTime = Date.now() - start;
+      const executionTime = Date.now() - start; // Calculate execution time
 
+      // Validate the result shape
       if (!this.isValidResult(result)) {
         return {
           success: false,
@@ -84,8 +91,8 @@ export class SandboxService {
       const executionTime = Date.now() - start;
       this.logger.error('Sandbox execution caught an error:', err);
 
-      let errorMsg: string = 'Unknown Error';
-
+      // Determine appropriate error message
+      let errorMsg = 'Unknown Error';
       if (err instanceof Error) {
         errorMsg = err.message;
         if (
@@ -96,7 +103,6 @@ export class SandboxService {
           errorMsg = 'Script execution timed out';
         }
       } else if (typeof err === 'string') {
-        // isolated-vm might throw strings for some errors (like timeout)
         errorMsg = err;
         if (
           err.toLowerCase().includes('timeout') ||
@@ -105,15 +111,11 @@ export class SandboxService {
           errorMsg = 'Script execution timed out';
         }
       } else if (err && typeof err.toString === 'function') {
-        // Fallback for other error types
         errorMsg = (err as any).toString();
       }
 
+      // Log the error details
       this.logger.warn(`Execution failed. Reported error: "${errorMsg}"`, {
-        originalErrorDetails: err,
-        executionTime,
-      });
-      console.error(`Execution failed. Reported error: "${errorMsg}"`, {
         originalErrorDetails: err,
         executionTime,
       });
